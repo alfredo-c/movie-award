@@ -9,7 +9,10 @@
 
 ## Description
 
-On initialization the system will dump data from csv file, and on the GET /producers/stats/award-intervals route will retrieve only winners with the minimun and maximum between two oscars.
+On initialization the system will dump data from csv file, and the following URL will retrieve only winners with the minimun and maximum between two oscars.
+
+URL: http://localhost:3000/producer/stats/award-intervals
+Method: GET
 
 ## Project setup
 

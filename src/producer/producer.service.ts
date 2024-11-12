@@ -71,9 +71,9 @@ export class ProducerService implements OnModuleInit {
       let maxFirstWinIndex = -1;
       let maxSecondWinIndex = -1;
 
-      const movies = producer.movies.sort((a, b) => a.year - b.year);
-      for (let i = 0; i < movies.length - 1; i++) {
-        const interval = movies[i + 1].year - movies[i].year;
+      const winnerMovies = producer.movies.filter(movie => movie.winner).sort((a, b) => a.year - b.year);
+      for (let i = 0; i < winnerMovies.length - 1; i++) {
+        const interval = winnerMovies[i + 1].year - winnerMovies[i].year;
         if (interval < minInterval) {
           minInterval = interval;
           minFirstWinIndex = i;
@@ -89,11 +89,11 @@ export class ProducerService implements OnModuleInit {
       return {
         producer: producer.name,
         minInterval,
-        minPreviousWin: movies[minFirstWinIndex]?.year,
-        minFollowingWin: movies[minSecondWinIndex]?.year,
+        minPreviousWin: winnerMovies[minFirstWinIndex]?.year,
+        minFollowingWin: winnerMovies[minSecondWinIndex]?.year,
         maxInterval,
-        maxPreviousWin: movies[maxFirstWinIndex]?.year,
-        maxFollowingWin: movies[maxSecondWinIndex]?.year,
+        maxPreviousWin: winnerMovies[maxFirstWinIndex]?.year,
+        maxFollowingWin: winnerMovies[maxSecondWinIndex]?.year,
       };
     }).filter(element => element !== null);
 
