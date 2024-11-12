@@ -15,10 +15,35 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
-  it('/ (GET)', () => {
+  it('/ (GET)/producer/stats/award-intervals', () => {
+    const expectedResult = {
+      "min": [
+        {
+          "producer": "Bo Derek",
+          "interval": 1,
+          "previousWin": 1990,
+          "followingWin": 1991
+        },
+        {
+          "producer": "Carol Baum and Howard Rosenman",
+          "interval": 1,
+          "previousWin": 1990,
+          "followingWin": 1991
+        }
+      ],
+      "max": [
+        {
+          "producer": "Carol Baum and Howard Rosenman",
+          "interval": 8,
+          "previousWin": 1991,
+          "followingWin": 1999
+        }
+      ]
+    };
+
     return request(app.getHttpServer())
-      .get('/')
+      .get('/producer/stats/award-intervals')
       .expect(200)
-      .expect('Hello World!');
+      .expect(expectedResult);
   });
 });

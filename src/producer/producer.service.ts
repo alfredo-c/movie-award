@@ -14,9 +14,9 @@ export class ProducerService implements OnModuleInit {
     private repository: Repository<Producer>,
   ) {}
 
-  onModuleInit() {
+  async onModuleInit() {
     console.log('Loading database from file...');
-    this.dumpData();
+    await this.dumpData();
   }
 
   async dumpData() {
@@ -56,7 +56,7 @@ export class ProducerService implements OnModuleInit {
     return this.repository.save(createProducerDto);
   }
 
-  async findAwardIntervals() {
+  async getAwardIntervals() {
     const producers = await this.repository.find({
       relations: ['movies'], 
     });
