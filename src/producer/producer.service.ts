@@ -31,7 +31,7 @@ export class ProducerService implements OnModuleInit {
           firstLine = false;
           continue;
         }
-        
+
         const [year, title, _studio, name, winner] = line.split(';');
 
         if (!producerHash[name]) {
@@ -44,7 +44,7 @@ export class ProducerService implements OnModuleInit {
       for (const producer of Object.values(producerHash)) {
         await this.create(producer);
       }
-      
+
       console.log('Loading database finished');
     } catch (error) {
       console.error('Error reading file:', error.message);
@@ -56,9 +56,36 @@ export class ProducerService implements OnModuleInit {
     return this.repository.save(createProducerDto);
   }
 
-  async findAll() {
-    return this.repository.find({
+  async findAwardIntervals() {
+    const producers = await this.repository.find({
       relations: ['movies'],
     });
+    return producers.map(producer => {
+      const movies = producer.movies.sort((a, b) => a.year - b.year);
+      const hasAtLeastTwoWinners = movies.filter(movie => movie.winner).length >= 2;
+      if(!hasAtLeastTwoWinners) return null;
+
+      let minInterval = Number.MAX_SAFE_INTEGER;
+      let firstWinIndex = -1;
+      let secondWinIndex = -1;
+      
+      for (let i = 0; i < movies.length - 1; i++) {
+        if (movies[i].winner && movies[i + 1].winner) {
+          const interval = movies[i + 1].year - movies[i].year;
+          if (interval < minInterval) {
+            minInterval = interval;
+            firstWinIndex = i;
+            secondWinIndex = i + 1;
+          }
+        } 
+      }
+
+      return {
+        producer: producer.name,
+        interval: minInterval,
+        previousWin: movies[firstWinIndex]?.year,
+        followingWin: movies[secondWinIndex]?.year,
+      };
+    }).filter(element => element !== null);
   }
 }

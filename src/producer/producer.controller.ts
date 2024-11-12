@@ -5,8 +5,8 @@ import { ProducerService } from './producer.service';
 export class ProducerController {
   constructor(private readonly producerService: ProducerService) {}
 
-  @Get('stats')
-  async findAll(): Promise<any[]> {
-    return this.producerService.findAll();
+  @Get('stats/award-intervals')
+  async findAwardIntervals(): Promise<any[]> {
+    return this.producerService.findAwardIntervals();
   }
 }
