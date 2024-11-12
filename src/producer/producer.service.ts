@@ -58,34 +58,61 @@ export class ProducerService implements OnModuleInit {
 
   async findAwardIntervals() {
     const producers = await this.repository.find({
-      relations: ['movies'],
+      relations: ['movies'], 
     });
-    return producers.map(producer => {
-      const movies = producer.movies.sort((a, b) => a.year - b.year);
-      const hasAtLeastTwoWinners = movies.filter(movie => movie.winner).length >= 2;
-      if(!hasAtLeastTwoWinners) return null;
 
+    const producersWithTwoWinners = producers.filter(producer => producer.movies.filter(movie => movie.winner).length >= 2);
+
+    const producersWithInterval = producersWithTwoWinners.map(producer => {
       let minInterval = Number.MAX_SAFE_INTEGER;
-      let firstWinIndex = -1;
-      let secondWinIndex = -1;
-      
+      let minFirstWinIndex = -1;
+      let minSecondWinIndex = -1;
+      let maxInterval = 0;
+      let maxFirstWinIndex = -1;
+      let maxSecondWinIndex = -1;
+
+      const movies = producer.movies.sort((a, b) => a.year - b.year);
       for (let i = 0; i < movies.length - 1; i++) {
-        if (movies[i].winner && movies[i + 1].winner) {
-          const interval = movies[i + 1].year - movies[i].year;
-          if (interval < minInterval) {
-            minInterval = interval;
-            firstWinIndex = i;
-            secondWinIndex = i + 1;
-          }
-        } 
+        const interval = movies[i + 1].year - movies[i].year;
+        if (interval < minInterval) {
+          minInterval = interval;
+          minFirstWinIndex = i;
+          minSecondWinIndex = i + 1;
+        }
+        if (interval > maxInterval) {
+          maxInterval = interval;
+          maxFirstWinIndex = i;
+          maxSecondWinIndex = i + 1;
+        }
       }
 
       return {
         producer: producer.name,
-        interval: minInterval,
-        previousWin: movies[firstWinIndex]?.year,
-        followingWin: movies[secondWinIndex]?.year,
+        minInterval,
+        minPreviousWin: movies[minFirstWinIndex]?.year,
+        minFollowingWin: movies[minSecondWinIndex]?.year,
+        maxInterval,
+        maxPreviousWin: movies[maxFirstWinIndex]?.year,
+        maxFollowingWin: movies[maxSecondWinIndex]?.year,
       };
     }).filter(element => element !== null);
+
+    const minInterval = producersWithInterval.reduce((acc, curr) => curr.minInterval < acc.minInterval ? curr : acc, producersWithInterval[0]);
+    const maxInterval = producersWithInterval.reduce((acc, curr) => curr.maxInterval > acc.maxInterval ? curr : acc, producersWithInterval[0]);
+
+    return {
+      min: producersWithInterval.filter(producer => producer.minInterval === minInterval.minInterval).map(producer => ({
+        producer: producer.producer,
+        interval: producer.minInterval,
+        previousWin: producer.minPreviousWin,
+        followingWin: producer.minFollowingWin,
+      })),
+      max: producersWithInterval.filter(producer => producer.maxInterval === maxInterval.maxInterval).map(producer => ({
+        producer: producer.producer,
+        interval: producer.maxInterval,
+        previousWin: producer.maxPreviousWin,
+        followingWin: producer.maxFollowingWin,
+      })),
+    };
   }
 }
